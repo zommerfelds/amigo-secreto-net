@@ -14,5 +14,5 @@ gp env PULUMI_ACCESS_TOKEN=xxx
 
 Starting the stack:
 ```
-pulumi up
+pulumi up --stack dev --yes
 ```
