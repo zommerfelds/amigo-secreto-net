@@ -47,7 +47,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
-                    const numRows = Math.min(10, eventBody.numRows) | 0;
+                    const numRows = Math.min(10, eventBody.names.length) | 0;
 
                     const drawId = uuid.v4();
 
@@ -60,7 +60,8 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'EntryNum': i,
                                     'Version': 1,
                                     'Seen': false,
-                                    'DrawnName': 'Chri'
+                                    'DrawnName': 'xxx',
+                                    'IntendedViewer': eventBody.names[i],
                                 }
                             }
                         });
@@ -72,10 +73,18 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     };
                     await db.batchWrite(batchWriteParams).promise();
 
+                    var outputEntries = [];
+                    for (var i = 0; i < numRows; i++) {
+                        outputEntries.push({
+                            name: eventBody.names[i],
+                            path: "e?d=" + drawId + "&n=" + i,
+                        });                        
+                    }
+
                     return {
                         statusCode: 200,
                         body: JSON.stringify({
-                            path: "e?d=" + drawId + "&n=0",
+                            entries: outputEntries
                         }),
                         headers: { "content-type": "application/json" },
                     };

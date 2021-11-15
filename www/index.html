@@ -34,22 +34,32 @@
             <div id="form" class="block">
             </div>
 
-            <button class="button block" onclick="addName();">
-                <span class="icon is-small">
-                    <i class="fas fa-plus"></i>
-                </span>
-                <span>Adicionar nome</span>
-            </button>
+            <div class="field">
+                <div class="control">
+                    <button class="button block" onclick="addName();">
+                        <span class="icon is-small">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span>Adicionar nome</span>
+                    </button>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary" id="submit" onclick="submit();">Sortear</button>
+                </div>
+            </div>
             <p>
-                Test: <span id="source">loading...</span>
+                <span id="source"></span>
             </p>
         </div>
     </section>
 
     <script>
+        var nameInputs = [];
+
         var numNames = 0;
         function addName() {
-            console.log('Add name');
             var fieldElem = document.createElement("div");
             fieldElem.classList.add("field");
             var labelElem = document.createElement("label");
@@ -63,26 +73,46 @@
             inputElem.classList.add("input");
             inputElem.setAttribute("type", "text");
             inputElem.setAttribute("placeholder", "Inserir nome");
+            nameInputs.push(inputElem);
             controlElem.appendChild(inputElem);
             document.getElementById("form").appendChild(fieldElem);
 
             numNames++;
         }
 
+        function submit() {
+            document.getElementById("submit").classList.add("is-loading");
+
+            console.log("Submit");
+            var names = [];
+            for (var i = 0; i < nameInputs.length; i++) {
+                console.log("Name: " + nameInputs[i].value);
+                names.push(nameInputs[i].value.trim());
+            }
+
+            fetch("draws", {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    names: names,
+                }),
+            }).then(response => response.json()).then(json => {
+                document.getElementById("submit").classList.remove("is-loading");
+
+                for (var i = 0; i < json.entries.length; i++) {
+                    document.getElementById("source").innerHTML +=
+                        json.entries[i].name + ": <a href='" + document.baseURI + json.entries[i].path + "'>link</a><br>";
+                }
+            });
+        }
+
         addName();
         addName();
         addName();
 
-        fetch("draws", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ numRows: 2 })
-        }).then(response => response.json()).then(json => {
-            document.getElementById("source").innerText = document.baseURI + json.path;
-        });
     </script>
 </body>
 
