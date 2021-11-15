@@ -3,6 +3,7 @@ tasks:
       curl -fsSL https://get.pulumi.com | sh
       echo "Adding to PATH"
       echo "export PATH=\"\$PATH:/home/gitpod/.pulumi/bin\"" >> /home/gitpod/.bashrc
+      yarn install
       bash
 
       # Amazon CLI:
