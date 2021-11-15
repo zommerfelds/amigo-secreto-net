@@ -12,19 +12,20 @@
 
 <body>
     <h1>Amigo Secreto Net</h1>
-    <p></p>
-    <p>Result: <span id="source">loading...</span></p>
+    <p>Entry: <span id="source">loading...</span></p>
 </body>
 <script>
-    fetch("draws", {
-        method: "POST",
+    const params = new URLSearchParams(location.search);
+    var drawId = params.get("d");
+    var entryNum = params.get("n");
+
+    fetch(`draws/${drawId}/entries/${entryNum}`, {
+        method: "GET",
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ numRows: 2 })
     }).then(response => response.json()).then(json => {
-        document.getElementById("source").innerText = document.baseURI + json.path;
+        document.getElementById("source").innerText = json.name;
     });
 </script>
 

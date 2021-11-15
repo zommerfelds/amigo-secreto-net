@@ -26,12 +26,16 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             path: "/",
             localPath: "www",
         },
+        {
+            path: "/e",
+            localPath: "www/entry.html",
+        },
 
-        // Serve a simple REST API on `GET /name` (using AWS Lambda)
+        // Serve a simple REST API using AWS Lambda
         {
             path: "/draws",
             method: "POST",
-            eventHandler: new aws.lambda.CallbackFunction(prefix + "lambda", {
+            eventHandler: new aws.lambda.CallbackFunction(prefix + "draws-post", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
                     const uuid = require('uuid');
@@ -56,6 +60,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'EntryNum': i,
                                     'Version': 1,
                                     'Seen': false,
+                                    'DrawnName': 'Chri'
                                 }
                             }
                         });
@@ -69,7 +74,45 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
 
                     return {
                         statusCode: 200,
-                        body: JSON.stringify({ name: "AWS" }),
+                        body: JSON.stringify({
+                            path: "e?d=" + drawId + "&n=0",
+                        }),
+                        headers: { "content-type": "application/json" },
+                    };
+                }
+            }),
+        },
+        {
+            path: "/draws/{drawId}/entries/{entryNum}",
+            method: "GET", // TODO: add a post method and don't return the name in this one.
+            eventHandler: new aws.lambda.CallbackFunction(prefix + "entries-get", {
+                callback: async event => {
+                    const AWS = require('aws-sdk');
+
+                    AWS.config.update({ region: region.get().id });
+                    const db = new AWS.DynamoDB.DocumentClient();
+
+                    const drawId = event.pathParameters.drawId;
+                    const entryNum = Number(event.pathParameters.entryNum);
+
+                    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
+                    const params = {
+                        TableName: drawsTable.name.get(),
+                        KeyConditionExpression: 'DrawId = :hkey and EntryNum = :rkey',
+                        ExpressionAttributeValues: {
+                          ':hkey': drawId,
+                          ':rkey': entryNum,
+                        },
+                        ProjectionExpression: 'DrawnName',
+                        Limit: 1,
+                      };
+                    console.log("params: ", params);
+                    const data = await db.query(params).promise();
+                    const item = data.Items[0];
+
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({ name: item.DrawnName }),
                         headers: { "content-type": "application/json" },
                     };
                 }
