@@ -2,10 +2,10 @@ tasks:
   - before: |
       curl -fsSL https://get.pulumi.com | sh
       echo "export PATH=\"\$PATH:/home/gitpod/.pulumi/bin\"" >> /home/gitpod/.bashrc
-      exit
+      bash
 
       # Amazon CLI:
       # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       # unzip awscliv2.zip
       # sudo ./aws/install
-    command: ls # Start a terminal
+    command: ls
