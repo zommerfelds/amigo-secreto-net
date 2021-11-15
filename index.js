@@ -5,11 +5,13 @@ const awsx = require("@pulumi/awsx");
 
 const prefix = `${pulumi.getProject()}-${pulumi.getStack()}-`;
 
-const db = new aws.dynamodb.Table(prefix + "db", {
+const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     attributes: [
-        { name: "Id", type: "S" },
+        { name: "DrawId", type: "S" },
+        { name: "EntryNum", type: "N" },
     ],
-    hashKey: "Id",
+    hashKey: "DrawId",
+    rangeKey: "EntryNum",
     billingMode: "PAY_PER_REQUEST"
 });
 
@@ -32,21 +34,38 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             eventHandler: new aws.lambda.CallbackFunction(prefix + "lambda", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
+                    const uuid = require('uuid');
+
                     AWS.config.update({ region: region.get().id });
-                    const ddb = new AWS.DynamoDB({ apiVersion: '2012-08-10' });
+                    const db = new AWS.DynamoDB.DocumentClient();
 
                     const buff = Buffer.from(event.body, "base64");
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
-                    const putItemParams = {
-                        TableName: db.name.get(),
-                        Item: {
-                            'Id': { S: eventBody.name }
+                    const numRows = Math.min(10, eventBody.numRows) | 0;
+
+                    const drawId = uuid.v4();
+
+                    const putRequests = [];
+                    for (let i = 0; i < numRows; i++) {
+                        putRequests.push({
+                            PutRequest: {
+                                Item: {
+                                    'DrawId': drawId,
+                                    'EntryNum': i,
+                                    'Version': 1,
+                                    'Seen': false,
+                                }
+                            }
+                        });
+                    }
+                    const batchWriteParams = {
+                        RequestItems: {
+                            [drawsTable.name.get()]: putRequests
                         }
                     };
-                    console.log("putItemParams:", putItemParams);
-                    await ddb.putItem(putItemParams).promise();
+                    await db.batchWrite(batchWriteParams).promise();
 
                     return {
                         statusCode: 200,

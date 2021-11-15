@@ -17,12 +17,12 @@
 </body>
 <script>
     fetch("draws", {
+        method: "POST",
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        method: "POST",
-        body: JSON.stringify({ name: 'Chri' })
+        body: JSON.stringify({ numRows: 2 })
     }).then(response => response.json()).then(json => {
         document.getElementById("source").innerText = json.name;
     });
