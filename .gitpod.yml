@@ -1,6 +1,7 @@
 tasks:
   - before: |
       curl -fsSL https://get.pulumi.com | sh
+      echo "Adding to PATH"
       echo "export PATH=\"\$PATH:/home/gitpod/.pulumi/bin\"" >> /home/gitpod/.bashrc
       bash
 
