@@ -4,28 +4,86 @@
 <head>
     <meta charset="utf-8">
     <title>Amigo Secreto Net</title>
+
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+
+    <!--link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/duotone.css" integrity="sha384-R3QzTxyukP03CMqKFe0ssp5wUvBPEyy9ZspCB+Y01fEjhMwcXixTyeot+S40+AjZ" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/fontawesome.css" integrity="sha384-eHoocPgXsiuZh+Yy6+7DsKAerLXyJmu2Hadh4QYyt+8v86geixVYwFqUvMU8X90l" crossorigin="anonymous"/-->
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 </head>
 
 <body>
-    <h1>Amigo Secreto Net</h1>
-    <p></p>
-    <p>Result: <span id="source">loading...</span></p>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">
+                Amigo-Secreto.Net
+            </h1>
+            <p class="subtitle">
+                O site mais simples para organizar o seu amigo secreto.
+            </p>
+
+            <p class="block">Nenhum cadastro ou e-mail é necessario!</p>
+
+            <div id="form" class="block">
+            </div>
+
+            <button class="button block" onclick="addName();">
+                <span class="icon is-small">
+                    <i class="fas fa-plus"></i>
+                </span>
+                <span>Adicionar nome</span>
+            </button>
+            <p>
+                Test: <span id="source">loading...</span>
+            </p>
+        </div>
+    </section>
+
+    <script>
+        var numNames = 0;
+        function addName() {
+            console.log('Add name');
+            var fieldElem = document.createElement("div");
+            fieldElem.classList.add("field");
+            var labelElem = document.createElement("label");
+            labelElem.classList.add("label");
+            labelElem.textContent = "Nome " + (numNames + 1);
+            fieldElem.appendChild(labelElem);
+            var controlElem = document.createElement("div");
+            controlElem.classList.add("control");
+            fieldElem.appendChild(controlElem);
+            var inputElem = document.createElement("input");
+            inputElem.classList.add("input");
+            inputElem.setAttribute("type", "text");
+            inputElem.setAttribute("placeholder", "Inserir nome");
+            controlElem.appendChild(inputElem);
+            document.getElementById("form").appendChild(fieldElem);
+
+            numNames++;
+        }
+
+        addName();
+        addName();
+        addName();
+
+        fetch("draws", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ numRows: 2 })
+        }).then(response => response.json()).then(json => {
+            document.getElementById("source").innerText = document.baseURI + json.path;
+        });
+    </script>
 </body>
-<script>
-    fetch("draws", {
-        method: "POST",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ numRows: 2 })
-    }).then(response => response.json()).then(json => {
-        document.getElementById("source").innerText = document.baseURI + json.path;
-    });
-</script>
 
 </html>
