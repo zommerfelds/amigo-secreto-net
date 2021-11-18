@@ -4,6 +4,7 @@ const awsx = require("@pulumi/awsx");
 
 const prefix = `${pulumi.getProject()}-${pulumi.getStack()}-`;
 const region = pulumi.output(aws.getRegion());
+const domainName = (pulumi.getStack() == "prod") ? "amigo-secreto.net" : null;
 
 const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     attributes: [
@@ -189,6 +190,58 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
         },
     ],
 });
+
+if (domainName != null) {
+    const route53ZoneId = aws.route53.getZone({
+        name: domainName,
+        privateZone: false,
+    }).then(r => r.id);
+
+    const cert = new aws.acm.Certificate(prefix + "cert", {
+        domainName: domainName,
+        validationMethod: "EMAIL",
+    });
+    // Note: need to check emails during "pulumi up"
+    new aws.acm.CertificateValidation(prefix + "cert-validation", { certificateArn: cert.arn });
+
+    const apiGatewayDomainName = new aws.apigateway.DomainName(prefix + "domain", {
+        certificateArn: cert.arn,
+        domainName: domainName,
+    });
+
+    const record = new aws.route53.Record(prefix + "record", {
+        name: domainName,
+        type: "A",
+        zoneId: route53ZoneId,
+        aliases: [{
+            evaluateTargetHealth: true,
+            name: apiGatewayDomainName.cloudfrontDomainName,
+            zoneId: apiGatewayDomainName.cloudfrontZoneId,
+        }],
+    });
+
+    /*
+    TODO: It would be good to setup a 301 redirect for www.
+    new aws.route53.Record(prefix + "record-www", {
+        name: "www." + domainName,
+        type: "CNAME",
+        zoneId: route53ZoneId,
+        records: [
+            domainName + "."
+        ],
+        ttl: 3600,
+    });
+    */
+
+    // WARNING: I had to manually go to 
+    // https://console.aws.amazon.com/apigateway/main/publish/domain-names/api-mappings?domain=amigo-secreto.net&region=us-east-1
+    // and add the stage name. Somehow it didn't work via Pulumi.
+    const basePathMapping = new aws.apigateway.BasePathMapping(prefix + "mapping", {
+        restApi: endpoint.restAPI.id,
+        stageName: endpoint.stage.stageName,
+        domainName: domainName,
+    });
+}
 
 // Export the public URL for the HTTP service
 exports.url = endpoint.url;

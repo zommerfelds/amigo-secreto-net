@@ -1,5 +1,9 @@
 # amigo-secreto-net
-Secret santa naming drawing service
+Secret santa naming drawing service in Portuguese.
+
+NOTE: work in progress!
+
+[amigo-secreto.net](https://amigo-secreto.net)
 
 ## Development
 
@@ -11,6 +15,20 @@ gp env AWS_ACCESS_KEY_ID=xxx
 gp env AWS_SECRET_ACCESS_KEY=xxx
 gp env PULUMI_ACCESS_TOKEN=xxx
 ```
+
+The AWS user should work with the following permissions:
+```
+IAMFullAccess
+AmazonS3FullAccess
+AmazonAPIGatewayInvokeFullAccess
+AmazonDynamoDBFullAccess
+CloudFrontFullAccess
+AmazonAPIGatewayAdministrator
+AmazonRoute53FullAccess
+AWSCertificateManagerFullAccess
+AWSLambda_FullAccess
+```
+(There are probably some that can be narrowed down.)
 
 Starting the stack:
 ```
