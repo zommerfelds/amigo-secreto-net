@@ -1,9 +1,9 @@
-// Import the [pulumi/aws](https://pulumi.io/reference/pkg/nodejs/@pulumi/aws/index.html) package
 const pulumi = require("@pulumi/pulumi");
 const aws = require("@pulumi/aws");
 const awsx = require("@pulumi/awsx");
 
 const prefix = `${pulumi.getProject()}-${pulumi.getStack()}-`;
+const region = pulumi.output(aws.getRegion());
 
 const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     attributes: [
@@ -14,8 +14,6 @@ const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     rangeKey: "EntryNum",
     billingMode: "PAY_PER_REQUEST"
 });
-
-const region = pulumi.output(aws.getRegion());
 
 // Create a public HTTP endpoint (using AWS APIGateway)
 const endpoint = new awsx.apigateway.API(prefix + "api", {
@@ -39,6 +37,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
                     const uuid = require('uuid');
+                    const sanitizeHtml = require('sanitize-html');
 
                     AWS.config.update({ region: region.get().id });
                     const db = new AWS.DynamoDB.DocumentClient();
@@ -61,7 +60,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'Version': 1,
                                     'Seen': false,
                                     'DrawnName': 'xxx',
-                                    'IntendedViewer': eventBody.names[i],
+                                    'IntendedViewer': sanitizeHtml(eventBody.names[i]),
                                 }
                             }
                         });
@@ -78,7 +77,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         outputEntries.push({
                             name: eventBody.names[i],
                             path: "e?d=" + drawId + "&n=" + i,
-                        });                        
+                        });
                     }
 
                     return {
@@ -93,7 +92,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
         },
         {
             path: "/draws/{drawId}/entries/{entryNum}",
-            method: "GET", // TODO: add a post method and don't return the name in this one.
+            method: "GET",
             eventHandler: new aws.lambda.CallbackFunction(prefix + "entries-get", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
@@ -109,19 +108,80 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         TableName: drawsTable.name.get(),
                         KeyConditionExpression: 'DrawId = :hkey and EntryNum = :rkey',
                         ExpressionAttributeValues: {
-                          ':hkey': drawId,
-                          ':rkey': entryNum,
+                            ':hkey': drawId,
+                            ':rkey': entryNum,
                         },
-                        ProjectionExpression: 'DrawnName',
+                        ProjectionExpression: 'IntendedViewer, Seen',
                         Limit: 1,
-                      };
+                    };
                     console.log("params: ", params);
                     const data = await db.query(params).promise();
+                    console.log("Data: ", data);
                     const item = data.Items[0];
 
                     return {
                         statusCode: 200,
-                        body: JSON.stringify({ name: item.DrawnName }),
+                        body: JSON.stringify({
+                            viewer: item.IntendedViewer,
+                            seen: item.Seen,
+                        }),
+                        headers: { "content-type": "application/json" },
+                    };
+                }
+            }),
+        },
+        {
+            path: "/draws/{drawId}/entries/{entryNum}/reveal",
+            method: "POST",
+            eventHandler: new aws.lambda.CallbackFunction(prefix + "entries-reveal-post", {
+                callback: async event => {
+                    const AWS = require('aws-sdk');
+
+                    AWS.config.update({ region: region.get().id });
+                    const db = new AWS.DynamoDB.DocumentClient();
+
+                    const drawId = event.pathParameters.drawId;
+                    const entryNum = Number(event.pathParameters.entryNum);
+
+                    const params = {
+                        TableName: drawsTable.name.get(),
+                        Key: {
+                            DrawId: drawId,
+                            EntryNum: entryNum,
+                        },
+                        UpdateExpression: 'set Seen = :true',
+                        ExpressionAttributeValues: {
+                            ":true": true,
+                            ":false": false,
+                        },
+                        ConditionExpression: 'Seen = :false',
+                        ReturnValues: 'ALL_NEW'
+                    };
+                    console.log("params: ", params);
+                    var data;
+                    try {
+                        data = await db.update(params).promise();
+                        console.log("Data: ", data);
+                    } catch (e) {
+                        if (e.code == "ConditionalCheckFailedException") {
+
+                            return {
+                                statusCode: 400,
+                                body: JSON.stringify({
+                                    reason: "ALREADY_DRAWN",
+                                }),
+                                headers: { "content-type": "application/json" },
+                            };
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    return {
+                        statusCode: 200,
+                        body: JSON.stringify({
+                            drawnName: data.Attributes.DrawnName,
+                        }),
                         headers: { "content-type": "application/json" },
                     };
                 }

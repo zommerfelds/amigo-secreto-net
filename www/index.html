@@ -13,10 +13,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
 
-    <!--link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/duotone.css" integrity="sha384-R3QzTxyukP03CMqKFe0ssp5wUvBPEyy9ZspCB+Y01fEjhMwcXixTyeot+S40+AjZ" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/fontawesome.css" integrity="sha384-eHoocPgXsiuZh+Yy6+7DsKAerLXyJmu2Hadh4QYyt+8v86geixVYwFqUvMU8X90l" crossorigin="anonymous"/-->
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
         integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    
+        <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -32,11 +32,20 @@
             <p class="block">Nenhum cadastro ou e-mail é necessario!</p>
 
             <div id="form" class="block">
+                <template id="nameInputTemplate">
+                    <div class="field">
+                        <div class="control">
+                            <label class="label"></label>
+                            <input class="input" type="text" placeholder="Inserir nome">
+                        </div>
+                    </div>
+                </template>
+
             </div>
 
-            <div class="field">
+            <div class="field" id="addName">
                 <div class="control">
-                    <button class="button block" onclick="addName();">
+                    <button class="button block" onclick="addNameAndScroll();">
                         <span class="icon is-small">
                             <i class="fas fa-plus"></i>
                         </span>
@@ -59,25 +68,18 @@
         var nameInputs = [];
 
         var numNames = 0;
-        function addName() {
-            var fieldElem = document.createElement("div");
-            fieldElem.classList.add("field");
-            var labelElem = document.createElement("label");
-            labelElem.classList.add("label");
-            labelElem.textContent = "Nome " + (numNames + 1);
-            fieldElem.appendChild(labelElem);
-            var controlElem = document.createElement("div");
-            controlElem.classList.add("control");
-            fieldElem.appendChild(controlElem);
-            var inputElem = document.createElement("input");
-            inputElem.classList.add("input");
-            inputElem.setAttribute("type", "text");
-            inputElem.setAttribute("placeholder", "Inserir nome");
-            nameInputs.push(inputElem);
-            controlElem.appendChild(inputElem);
-            document.getElementById("form").appendChild(fieldElem);
+        function addNameElement() {
+            var nameInput = document.getElementById("nameInputTemplate").content.cloneNode(true);
+            nameInput.querySelector("label").innerText = "Nome " + (numNames + 1);
+            nameInputs.push(nameInput.querySelector("input"));
+            document.getElementById("form").appendChild(nameInput);
 
             numNames++;
+        }
+
+        function addNameAndScroll() {
+            addNameElement();
+            document.getElementById("addName").scrollIntoView();
         }
 
         function submit() {
@@ -109,9 +111,9 @@
             });
         }
 
-        addName();
-        addName();
-        addName();
+        addNameElement();
+        addNameElement();
+        addNameElement();
 
     </script>
 </body>

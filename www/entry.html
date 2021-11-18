@@ -4,29 +4,89 @@
 <head>
     <meta charset="utf-8">
     <title>Amigo Secreto Net</title>
+
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+        integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h1>Amigo Secreto Net</h1>
-    <p>Entry: <span id="source">loading...</span></p>
-</body>
-<script>
-    const params = new URLSearchParams(location.search);
-    var drawId = params.get("d");
-    var entryNum = params.get("n");
+    <section class="section">
+        <div class="container">
+            <div id="loading">
+                <p class="block">Aguarde um momento por favor...</p>
+                <progress class="progress is-small is-primary"></progress>
+            </div>
+            <div id="entry" style="display: none;">
+                <p class="block">Olá, <strong><span id="viewerName"></span></strong>!</p>
 
-    fetch(`draws/${drawId}/entries/${entryNum}`, {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-        },
-    }).then(response => response.json()).then(json => {
-        document.getElementById("source").innerText = json.name;
-    });
-</script>
+                <button id="reveal" class="button is-large is-fullwidth is-danger is-rounded draw-button"
+                    onclick="revealDraw();">Clique aqui para revelar o seu amigo secreto.</button>
+            </div>
+            <div id="already-revealed" style="display: none;">
+                <p class="block">O seu link (<strong><span id="viewerName2"></span></strong>) já foi aberto e não pode mais ser revelado.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        var params = new URLSearchParams(location.search);
+        var drawId = params.get("d");
+        var entryNum = params.get("n");
+
+        fetch(`draws/${drawId}/entries/${entryNum}`, {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+            },
+        }).then(response => response.json()).then(json => {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("viewerName").innerText = json.viewer;
+            document.getElementById("viewerName2").innerText = json.viewer;
+            if (json.seen) {
+                document.getElementById("already-revealed").style.display = "block";
+            } else {
+                document.getElementById("entry").style.display = "block";
+            }
+            
+        });
+
+        var revealed = false;
+        function revealDraw() {
+            if (revealed) return;
+            revealed = true;
+
+            document.getElementById("reveal").classList.add("is-loading");
+
+            fetch(`draws/${drawId}/entries/${entryNum}/reveal`, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            }).then(response => response.json().then(json => {
+                if (response.status == 400 && json.reason == "ALREADY_DRAWN") {
+                    document.getElementById("reveal").innerText = "";
+                    location.reload();
+                } else if (response.ok){
+                    document.getElementById("reveal").innerText = json.drawnName;
+                } else {
+                    document.getElementById("reveal").innerText = "Ocoreu um erro :(";
+                }
+            })).finally(() => {
+                document.getElementById("reveal").classList.remove("is-loading");
+            });
+        }
+    </script>
+</body>
 
 </html>

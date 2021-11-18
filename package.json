@@ -5,10 +5,12 @@
         "@pulumi/aws": "^4.0.0",
         "@pulumi/awsx": "^0.30.0",
         "@pulumi/pulumi": "^3.0.0",
+        "sanitize-html": "^2.5.3",
         "uuid": "^8.3.2"
     },
     "scripts": {
-        "ui": "live-server www --open=index.html"
+        "ui": "echo Serving at $(gp url 8080)/index.html && live-server www --no-browser",
+        "deploy-dev": "pulumi up --stack dev --yes"
     },
     "devDependencies": {
         "live-server": "^1.2.1"

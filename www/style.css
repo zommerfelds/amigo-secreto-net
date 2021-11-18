@@ -1,0 +1,5 @@
+.draw-button {
+    height: 5em;
+    white-space: unset;
+    flex-direction: column;
+}
