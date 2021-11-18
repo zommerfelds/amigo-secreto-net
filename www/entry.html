@@ -22,18 +22,31 @@
 <body>
     <section class="section">
         <div class="container">
+            <h1 class="title"><a href=".">Amigo-Secreto.Net</a></h1>
             <div id="loading">
-                <p class="block">Aguarde um momento por favor...</p>
+                <p class="block">Carregando o seu amigo secreto...</p>
                 <progress class="progress is-small is-primary"></progress>
             </div>
             <div id="entry" style="display: none;">
                 <p class="block">Olá, <strong><span id="viewerName"></span></strong>!</p>
 
-                <button id="reveal" class="button is-large is-fullwidth is-danger is-rounded draw-button"
+                <div class="notification is-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Atenção</strong>: O seu nome secreto somente poderá ser revelado uma vez. Após clicar no
+                    botão abaixo, não será mais possível visibilisar o nome (mesmo com esse link). É recomendado salvar
+                    o nome com uma captura de tela.
+                </div>
+
+                <button id="reveal" class="button is-large is-fullwidth is-primary is-rounded draw-button"
                     onclick="revealDraw();">Clique aqui para revelar o seu amigo secreto.</button>
             </div>
             <div id="already-revealed" style="display: none;">
-                <p class="block">O seu link (<strong><span id="viewerName2"></span></strong>) já foi aberto e não pode mais ser revelado.</p>
+                <div class="notification is-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong><span id="viewerName2"></span></strong>: O seu link já foi aberto e não pode mais ser
+                    revelado.
+                </div>
+
             </div>
         </div>
     </section>
@@ -56,7 +69,7 @@
             } else {
                 document.getElementById("entry").style.display = "block";
             }
-            
+
         });
 
         var revealed = false;
@@ -76,7 +89,7 @@
                 if (response.status == 400 && json.reason == "ALREADY_DRAWN") {
                     document.getElementById("reveal").innerText = "";
                     location.reload();
-                } else if (response.ok){
+                } else if (response.ok) {
                     document.getElementById("reveal").innerText = json.drawnName;
                 } else {
                     document.getElementById("reveal").innerText = "Ocoreu um erro :(";

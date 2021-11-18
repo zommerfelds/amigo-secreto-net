@@ -15,21 +15,28 @@
 
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
         integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
-    
-        <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">
-                Amigo-Secreto.Net
-            </h1>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <p class="title"><a href=".">Amigo-Secreto.Net</a></p>
             <p class="subtitle">
                 O site mais simples para organizar o seu amigo secreto.
             </p>
+        </div>
+    </section>
+    <section class="section">
+        <div class="container">
 
             <p class="block">Nenhum cadastro ou e-mail é necessario!</p>
+
+            <div class="notification is-warning is-light">
+                <i class="fas fa-exclamation-triangle"></i>
+                Este site ainda está em fase de teste.
+            </div>
 
             <div id="form" class="block">
                 <template id="nameInputTemplate">
@@ -58,11 +65,19 @@
                     <button class="button is-primary" id="submit" onclick="submit();">Sortear</button>
                 </div>
             </div>
-            <p>
-                <span id="source"></span>
-            </p>
+            <div class="notification is-info is-light" style="display: none;" id="result">
+            </div>
         </div>
     </section>
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                © 2021 <a target="_blank" href="http://christian.zommerfelds.com">Christian Zommerfelds</a>.<br>
+                Um projeto <a target="_blank" href="https://github.com/zommerfelds/amigo-secreto-net">open-source <i
+                        class="fab fa-github"></i></a>.
+            </p>
+        </div>
+    </footer>
 
     <script>
         var nameInputs = [];
@@ -84,11 +99,10 @@
 
         function submit() {
             document.getElementById("submit").classList.add("is-loading");
+            document.getElementById("result").style.display = "none";
 
-            console.log("Submit");
             var names = [];
             for (var i = 0; i < nameInputs.length; i++) {
-                console.log("Name: " + nameInputs[i].value);
                 names.push(nameInputs[i].value.trim());
             }
 
@@ -104,9 +118,12 @@
             }).then(response => response.json()).then(json => {
                 document.getElementById("submit").classList.remove("is-loading");
 
+                document.getElementById("result").style.display = "block";
+                document.getElementById("result").innerHTML = "Aqui estão os links para cada participante:<br><br>";
                 for (var i = 0; i < json.entries.length; i++) {
-                    document.getElementById("source").innerHTML +=
-                        json.entries[i].name + ": <a href='" + document.baseURI + json.entries[i].path + "'>link</a><br>";
+                    var link = document.baseURI + json.entries[i].path;
+                    document.getElementById("result").innerHTML +=
+                        `${json.entries[i].name}:<br><a href="${link}">${link}</a><br>`;
                 }
             });
         }

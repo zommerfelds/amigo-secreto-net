@@ -9,7 +9,7 @@
         "sanitize-html": "^2.5.3"
     },
     "scripts": {
-        "ui": "echo Serving at $(gp url 8080)/index.html && live-server www --no-browser",
+        "ui": "echo $(gp url 8080)/index.html && echo $(gp url 8080)/entry.html && live-server www --no-browser",
         "deploy-dev": "pulumi up --stack dev --yes"
     },
     "devDependencies": {
