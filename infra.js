@@ -55,26 +55,30 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         names.push(sanitizeHtml(eventBody.names[i]));
                     }
 
-                    const drawnIndices = []; // 1 -> 0
+                    let drawnIndices = [];
 
-                    const remaining = [...Array(numRows).keys()]; // [0, 1, 2]
-                    let chainStart = null; // 1
-                    let current = null; // 0
-                    while (remaining.length > 0) {
-                        const nextDrawI = Math.floor(Math.random() * remaining.length); // 0
-                        const nextDraw = remaining[nextDrawI];
-                        console.log('r:', remaining, 'n:', nextDraw, 'i:', drawnIndices);
-                        if (chainStart == null) {
-                            chainStart = nextDraw;
-                            current = nextDraw;
-                        } else {
-                            drawnIndices[current] = nextDraw;
-                            current = nextDraw;
-                            remaining.splice(nextDrawI, 1);
-                            if (chainStart == current) {
-                                chainStart = null;
+                    while (true) {
+                        drawnIndices = [];
+                        const remaining = [...Array(numRows).keys()];
+                        let chainStart = null;
+                        let current = null;
+                        while (remaining.length > 0) {
+                            if (chainStart == null) {
+                                chainStart = remaining[Math.floor(Math.random() * remaining.length)];
+                                current = chainStart;
+                            } else {
+                                const candidates = remaining.filter(r => r != current);
+                                if (candidates.length == 0) break;
+                                const draw = candidates[Math.floor(Math.random() * candidates.length)];
+                                drawnIndices[current] = draw;
+                                current = draw;
+                                remaining.splice(remaining.indexOf(draw), 1);
+                                if (chainStart == current) {
+                                    chainStart = null;
+                                }
                             }
                         }
+                        if (remaining.length == 0) break;
                     }
 
                     const putRequests = [];
