@@ -94,12 +94,13 @@
 
         function addNameAndScroll() {
             addNameElement();
-            document.getElementById("addName").scrollIntoView({behavior: "smooth", block: "nearest"});
+            document.getElementById("addName").scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
 
         function submit() {
             document.getElementById("submit").classList.add("is-loading");
-            document.getElementById("result").style.display = "none";
+            var result = document.getElementById("result");
+            result.style.display = "none";
 
             var names = [];
             for (var i = 0; i < nameInputs.length; i++) {
@@ -118,13 +119,15 @@
             }).then(response => response.json()).then(json => {
                 document.getElementById("submit").classList.remove("is-loading");
 
-                document.getElementById("result").style.display = "block";
-                document.getElementById("result").innerHTML = "Aqui estão os links para cada participante:<br><br>";
+                result.style.display = "block";
+                result.innerHTML = "Aqui estão os links para cada participante:<br><br>";
                 for (var i = 0; i < json.entries.length; i++) {
                     var link = document.baseURI + json.entries[i].path;
-                    document.getElementById("result").innerHTML +=
+                    result.innerHTML +=
                         `${json.entries[i].name}:<br><a href="${link}">${link}</a><br>`;
                 }
+                result.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
+                result.scrollIntoView({ behavior: "smooth", block: "nearest" });
             });
         }
 
