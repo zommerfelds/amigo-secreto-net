@@ -124,7 +124,7 @@
                 for (var i = 0; i < json.entries.length; i++) {
                     var link = document.baseURI + json.entries[i].path;
                     result.innerHTML +=
-                        `${json.entries[i].name}:<br><a href="${link}">${link}</a><br>`;
+                        `${json.entries[i].name}:<br><a target="_blank" href="${link}">${link}</a><br>`;
                 }
                 result.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
                 result.scrollIntoView({ behavior: "smooth", block: "nearest" });
