@@ -45,12 +45,36 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
-                    const numRows = Math.min(10, eventBody.names.length) | 0;
+                    const numRows = Math.min(100, eventBody.names.length) | 0;
 
                     const drawId = nanoid.nanoid();
                     const entryIds = [];
+                    const names = [];
                     for (var i = 0; i < numRows; i++) {
                         entryIds.push(nanoid.nanoid());
+                        names.push(sanitizeHtml(eventBody.names[i]));
+                    }
+
+                    const drawnIndices = []; // 1 -> 0
+
+                    const remaining = [...Array(numRows).keys()]; // [0, 1, 2]
+                    let chainStart = null; // 1
+                    let current = null; // 0
+                    while (remaining.length > 0) {
+                        const nextDrawI = Math.floor(Math.random() * remaining.length); // 0
+                        const nextDraw = remaining[nextDrawI];
+                        console.log('r:', remaining, 'n:', nextDraw, 'i:', drawnIndices);
+                        if (chainStart == null) {
+                            chainStart = nextDraw;
+                            current = nextDraw;
+                        } else {
+                            drawnIndices[current] = nextDraw;
+                            current = nextDraw;
+                            remaining.splice(nextDrawI, 1);
+                            if (chainStart == current) {
+                                chainStart = null;
+                            }
+                        }
                     }
 
                     const putRequests = [];
@@ -62,8 +86,8 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'EntryId': entryIds[i],
                                     'Version': 1,
                                     'Seen': false,
-                                    'DrawnName': 'TODO',
-                                    'IntendedViewer': sanitizeHtml(eventBody.names[i]),
+                                    'DrawnName': names[drawnIndices[i]],
+                                    'IntendedViewer': names[i],
                                 }
                             }
                         });
@@ -78,7 +102,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     var outputEntries = [];
                     for (var i = 0; i < numRows; i++) {
                         outputEntries.push({
-                            name: eventBody.names[i],
+                            name: names[i],
                             path: "e?i=" + entryIds[i],
                         });
                     }
