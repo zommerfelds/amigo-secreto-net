@@ -8,11 +8,9 @@ const domainName = (pulumi.getStack() == "prod") ? "amigo-secreto.net" : null;
 
 const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     attributes: [
-        { name: "DrawId", type: "S" },
-        { name: "EntryNum", type: "N" },
+        { name: "EntryId", type: "S" },
     ],
-    hashKey: "DrawId",
-    rangeKey: "EntryNum",
+    hashKey: "EntryId",
     billingMode: "PAY_PER_REQUEST"
 });
 
@@ -32,12 +30,12 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
 
         // Serve a simple REST API using AWS Lambda
         {
-            path: "/draws",
+            path: "/api/draws",
             method: "POST",
             eventHandler: new aws.lambda.CallbackFunction(prefix + "draws-post", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
-                    const uuid = require('uuid');
+                    const nanoid = require('nanoid');
                     const sanitizeHtml = require('sanitize-html');
 
                     AWS.config.update({ region: region.get().id });
@@ -49,7 +47,11 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
 
                     const numRows = Math.min(10, eventBody.names.length) | 0;
 
-                    const drawId = uuid.v4();
+                    const drawId = nanoid.nanoid();
+                    const entryIds = [];
+                    for (var i = 0; i < numRows; i++) {
+                        entryIds.push(nanoid.nanoid());
+                    }
 
                     const putRequests = [];
                     for (let i = 0; i < numRows; i++) {
@@ -57,7 +59,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                             PutRequest: {
                                 Item: {
                                     'DrawId': drawId,
-                                    'EntryNum': i,
+                                    'EntryId': entryIds[i],
                                     'Version': 1,
                                     'Seen': false,
                                     'DrawnName': 'TODO',
@@ -77,7 +79,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     for (var i = 0; i < numRows; i++) {
                         outputEntries.push({
                             name: eventBody.names[i],
-                            path: "e?d=" + drawId + "&n=" + i,
+                            path: "e?i=" + entryIds[i],
                         });
                     }
 
@@ -92,7 +94,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             }),
         },
         {
-            path: "/draws/{drawId}/entries/{entryNum}",
+            path: "/api/entries/{entryId}",
             method: "GET",
             eventHandler: new aws.lambda.CallbackFunction(prefix + "entries-get", {
                 callback: async event => {
@@ -101,16 +103,12 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     AWS.config.update({ region: region.get().id });
                     const db = new AWS.DynamoDB.DocumentClient();
 
-                    const drawId = event.pathParameters.drawId;
-                    const entryNum = Number(event.pathParameters.entryNum);
-
                     // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#query-property
                     const params = {
                         TableName: drawsTable.name.get(),
-                        KeyConditionExpression: 'DrawId = :hkey and EntryNum = :rkey',
+                        KeyConditionExpression: 'EntryId = :eid',
                         ExpressionAttributeValues: {
-                            ':hkey': drawId,
-                            ':rkey': entryNum,
+                            ':eid': event.pathParameters.entryId,
                         },
                         ProjectionExpression: 'IntendedViewer, Seen',
                         Limit: 1,
@@ -132,7 +130,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             }),
         },
         {
-            path: "/draws/{drawId}/entries/{entryNum}/reveal",
+            path: "/api/entries/{entryId}/reveal",
             method: "POST",
             eventHandler: new aws.lambda.CallbackFunction(prefix + "entries-reveal-post", {
                 callback: async event => {
@@ -141,14 +139,10 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     AWS.config.update({ region: region.get().id });
                     const db = new AWS.DynamoDB.DocumentClient();
 
-                    const drawId = event.pathParameters.drawId;
-                    const entryNum = Number(event.pathParameters.entryNum);
-
                     const params = {
                         TableName: drawsTable.name.get(),
                         Key: {
-                            DrawId: drawId,
-                            EntryNum: entryNum,
+                            EntryId: event.pathParameters.entryId,
                         },
                         UpdateExpression: 'set Seen = :true',
                         ExpressionAttributeValues: {

@@ -40,10 +40,9 @@
 
     <script>
         var params = new URLSearchParams(location.search);
-        var drawId = params.get("d");
-        var entryNum = params.get("n");
+        var entryId = params.get("i");
 
-        fetch(`draws/${drawId}/entries/${entryNum}`, {
+        fetch(`api/entries/${entryId}`, {
             method: "GET",
             headers: {
                 'Accept': 'application/json',
@@ -67,7 +66,7 @@
 
             document.getElementById("reveal").classList.add("is-loading");
 
-            fetch(`draws/${drawId}/entries/${entryNum}/reveal`, {
+            fetch(`api/entries/${entryId}/reveal`, {
                 method: "POST",
                 headers: {
                     'Accept': 'application/json',

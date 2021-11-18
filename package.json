@@ -5,8 +5,8 @@
         "@pulumi/aws": "^4.0.0",
         "@pulumi/awsx": "^0.30.0",
         "@pulumi/pulumi": "^3.0.0",
-        "sanitize-html": "^2.5.3",
-        "uuid": "^8.3.2"
+        "nanoid": "^3.1.30",
+        "sanitize-html": "^2.5.3"
     },
     "scripts": {
         "ui": "echo Serving at $(gp url 8080)/index.html && live-server www --no-browser",
