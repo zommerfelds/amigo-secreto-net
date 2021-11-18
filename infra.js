@@ -59,7 +59,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'EntryNum': i,
                                     'Version': 1,
                                     'Seen': false,
-                                    'DrawnName': 'xxx',
+                                    'DrawnName': 'TODO',
                                     'IntendedViewer': sanitizeHtml(eventBody.names[i]),
                                 }
                             }
