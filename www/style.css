@@ -3,3 +3,7 @@
     white-space: unset;
     flex-direction: column;
 }
+
+.add-name-button {
+    scroll-margin: 2em;
+}

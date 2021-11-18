@@ -43,14 +43,14 @@
                     <div class="field">
                         <div class="control">
                             <label class="label"></label>
-                            <input class="input" type="text" placeholder="Inserir nome">
+                            <input class="input" type="text" placeholder="Inserir nome" autocomplete="nope">
                         </div>
                     </div>
                 </template>
 
             </div>
 
-            <div class="field" id="addName">
+            <div class="field add-name-button" id="addName">
                 <div class="control">
                     <button class="button block" onclick="addNameAndScroll();">
                         <span class="icon is-small">
@@ -94,7 +94,7 @@
 
         function addNameAndScroll() {
             addNameElement();
-            document.getElementById("addName").scrollIntoView();
+            document.getElementById("addName").scrollIntoView({behavior: "smooth", block: "nearest"});
         }
 
         function submit() {
