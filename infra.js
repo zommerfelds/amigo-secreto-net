@@ -233,9 +233,6 @@ if (domainName != null) {
     });
     */
 
-    // WARNING: I had to manually go to 
-    // https://console.aws.amazon.com/apigateway/main/publish/domain-names/api-mappings?domain=amigo-secreto.net&region=us-east-1
-    // and add the stage name. Somehow it didn't work via Pulumi.
     const basePathMapping = new aws.apigateway.BasePathMapping(prefix + "mapping", {
         restApi: endpoint.restAPI.id,
         stageName: endpoint.stage.stageName,
