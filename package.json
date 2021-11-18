@@ -6,5 +6,11 @@
         "@pulumi/awsx": "^0.30.0",
         "@pulumi/pulumi": "^3.0.0",
         "uuid": "^8.3.2"
+    },
+    "scripts": {
+        "ui": "live-server www --open=index.html"
+    },
+    "devDependencies": {
+        "live-server": "^1.2.1"
     }
 }

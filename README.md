@@ -16,3 +16,9 @@ Starting the stack:
 ```
 pulumi up --stack dev --yes
 ```
+
+For only previewing HTML files, without the backend:
+```
+yarn run ui
+```
+Note that auto-reload dosn't work on the root path (need to add `index.html`).
