@@ -98,9 +98,10 @@
         }
 
         function submit() {
-            document.getElementById("submit").classList.add("is-loading");
-            var result = document.getElementById("result");
-            result.style.display = "none";
+            var submitButton = document.getElementById("submit");
+            submitButton.classList.add("is-loading");
+            var resultElem = document.getElementById("result");
+            resultElem.style.display = "none";
 
             var names = [];
             for (var i = 0; i < nameInputs.length; i++) {
@@ -117,18 +118,19 @@
                     names: names,
                 }),
             }).then(response => response.json()).then(json => {
-                document.getElementById("submit").classList.remove("is-loading");
+                submitButton.classList.remove("is-loading");
+                submitButton.innerText = "Sortear mais uma vez";
 
-                result.style.display = "block";
-                result.innerHTML = "Aqui estão os links para cada participante:<br><br>";
+                resultElem.style.display = "block";
+                resultElem.innerHTML = "Aqui estão os links para cada participante:<br><br>";
                 for (var i = 0; i < json.entries.length; i++) {
                     var link = document.baseURI + json.entries[i].path;
                     var linkWithoutHttp = link.replace(/(^\w+:|^)\/\//, '');
-                    result.innerHTML +=
+                    resultElem.innerHTML +=
                         `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
                 }
-                result.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
-                result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
+                resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
             });
         }
 

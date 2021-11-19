@@ -10,7 +10,8 @@
     },
     "scripts": {
         "ui": "echo $(gp url 8080)/index.html && echo $(gp url 8080)/entry.html && live-server www --no-browser",
-        "deploy-dev": "pulumi up --stack dev --yes"
+        "deploy-dev": "pulumi up --stack dev --yes",
+        "deploy-prod": "pulumi up --stack prod"
     },
     "devDependencies": {
         "live-server": "^1.2.1"
