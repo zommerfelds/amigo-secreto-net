@@ -89,9 +89,9 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                     'DrawId': drawId,
                                     'EntryId': entryIds[i],
                                     'Version': 1,
-                                    'Seen': false,
                                     'DrawnName': names[drawnIndices[i]],
                                     'IntendedViewer': names[i],
+                                    'Created': Date.now()
                                 }
                             }
                         });
@@ -172,12 +172,11 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         Key: {
                             EntryId: event.pathParameters.entryId,
                         },
-                        UpdateExpression: 'set Seen = :true',
+                        UpdateExpression: 'set Seen = :time',
                         ExpressionAttributeValues: {
-                            ":true": true,
-                            ":false": false,
+                            ":time": Date.now(),
                         },
-                        ConditionExpression: 'Seen = :false',
+                        ConditionExpression: 'attribute_not_exists(Seen)',
                         ReturnValues: 'ALL_NEW'
                     };
                     console.log("params: ", params);
