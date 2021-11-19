@@ -22,7 +22,7 @@
 <body>
     <section class="hero is-primary">
         <div class="hero-body">
-            <p class="title"><a href=".">Amigo-Secreto.Net</a></p>
+            <p class="title"><a href=".">Amigo-Secreto.net</a></p>
             <p class="subtitle">
                 O site mais simples para organizar o seu amigo secreto.
             </p>
@@ -123,8 +123,9 @@
                 result.innerHTML = "Aqui estão os links para cada participante:<br><br>";
                 for (var i = 0; i < json.entries.length; i++) {
                     var link = document.baseURI + json.entries[i].path;
+                    var linkWithoutHttp = link.replace(/(^\w+:|^)\/\//, '');
                     result.innerHTML +=
-                        `${json.entries[i].name}:<br><a target="_blank" href="${link}">${link}</a><br>`;
+                        `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
                 }
                 result.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
                 result.scrollIntoView({ behavior: "smooth", block: "nearest" });

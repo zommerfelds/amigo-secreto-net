@@ -231,7 +231,7 @@ if (domainName != null) {
         domainName: domainName,
     });
 
-    const record = new aws.route53.Record(prefix + "record", {
+    new aws.route53.Record(prefix + "record", {
         name: domainName,
         type: "A",
         zoneId: route53ZoneId,
@@ -255,7 +255,7 @@ if (domainName != null) {
     });
     */
 
-    const basePathMapping = new aws.apigateway.BasePathMapping(prefix + "mapping", {
+    new aws.apigateway.BasePathMapping(prefix + "mapping", {
         restApi: endpoint.restAPI.id,
         stageName: endpoint.stage.stageName,
         domainName: domainName,
