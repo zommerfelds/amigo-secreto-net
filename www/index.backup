@@ -21,9 +21,9 @@
 </head>
 
 <body>
-    <section class="hero is-warning">
+    <section class="hero is-primary">
         <div class="hero-body">
-            <p class="title"><a class="nowrap" href=".">Amigo-Secreto.net</a> <i class="fad fa-gift"></i></p>
+            <p class="title"><a href=".">Amigo-Secreto.net</a> <i class="fad fa-gift"></i></p>
             <p class="subtitle">
                 O site mais simples para organizar o seu amigo secreto.
             </p>
@@ -39,62 +39,45 @@
                 Este site ainda está em fase de teste.
             </div>
 
-            <div id="form" class="block">
-                <template id="nameInputTemplate">
-                    <label class="label"></label>
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            <input class="input" type="text" placeholder="Inserir nome" autocomplete="nope">
+            <div class="box">
+                <label class="label is-large">Grupo 1</label>
+                <div id="form" class="block">
+                    <template id="nameInputTemplate">
+                        <div class="field">
+                            <div class="control">
+                                <label class="label"></label>
+                                <input class="input" type="text" placeholder="Inserir nome" autocomplete="nope">
+                            </div>
                         </div>
-                        <div class="control group-control" style="display: none;">
-                            <span class="select">
-                                <select>
-                                    <option></option>
-                                    <option>TODO</option>
-                                </select>
+                    </template>
+                </div>
+
+                <div class="field add-name-button" id="addName">
+                    <div class="control">
+                        <button class="button block" onclick="addNameAndScroll();">
+                            <span class="icon is-small">
+                                <i class="fas fa-plus"></i>
                             </span>
-                        </div>
+                            <span>Adicionar nome</span>
+                        </button>
                     </div>
-                </template>
-
+                </div>
             </div>
-
-            <div class="field add-name-button" id="addName">
+            <div class="field" id="addGroup">
                 <div class="control">
                     <button class="button block" onclick="addNameAndScroll();">
                         <span class="icon is-small">
                             <i class="fas fa-plus"></i>
                         </span>
-                        <span>Adicionar nome</span>
+                        <span>Adicionar grupo</span>
                     </button>
                 </div>
             </div>
-            <article class="message is-light">
-                <div class="message-header is-clickable" onclick="advancedSettings();">
-                    <p>Configurações avançadas TODO</p>
-                    <span class="icon">
-                        <i id="advanced-settings-icon" class="fas fa-angle-down" aria-hidden="true"></i>
-                    </span>
-                </div>
-                <div id="advanced-settings" class="message-body" style="display: none;">
-                    <div class="field">
-                        <input id="groupMode" type="checkbox" class="switch is-rounded" onclick="toggleGroupMode();">
-                        <label for="groupMode"></label>
-                        Ativar grupos que não sorteiam entre <span style="white-space:nowrap;">si
-                            <span class="tooltip-right tooltip-mobile"
-                                data-tooltip="Nomes no mesmo grupo nunca serão amigos secretos."><i
-                                    class="fas fa-info-circle"></i></span></span>
-                    </div>
-                    <div class="field block">
-                        <input id="destructiveMode" type="checkbox" class="switch is-rounded" checked>
-                        <label for="destructiveMode"></label>
-                        Links só podem ser abertos uma <span class="nowrap">vez
-                            <span class="tooltip-right tooltip-mobile"
-                                data-tooltip="Com essa opção, você poderá compartilhar todos os links em um grupo. O systema vai garantir que duas pessoas nunca podem abrir o mesmo link."><i
-                                    class="fas fa-info-circle"></i></span></span>
-                    </div>
-                </div>
-            </article>
+
+            <div class="field">
+                <input id="groupMode" type="checkbox" class="switch is-rounded">
+                <label for="groupMode">Ativar grupos que não sorteiam entre si</label>
+              </div>
 
             <div class="field">
                 <div class="control">
@@ -183,23 +166,6 @@
                     resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 });
             }).catch(showError);
-        }
-
-        function advancedSettings() {
-            var advancedSettings = document.getElementById("advanced-settings");
-            var shouldBeEnabled = advancedSettings.style.display == "none";
-            advancedSettings.style.display = shouldBeEnabled ? "block" : "none";
-            var icon = document.getElementById("advanced-settings-icon");
-            icon.classList.remove(shouldBeEnabled ? "fa-angle-down" : "fa-angle-up");
-            icon.classList.add(shouldBeEnabled ? "fa-angle-up" : "fa-angle-down");
-        }
-
-        function toggleGroupMode() {
-            var allNameElems = document.querySelectorAll(".group-control");
-            var groupModeEnabled = document.getElementById("groupMode").checked;
-            allNameElems.forEach(e => {
-                e.style.display = groupModeEnabled ? "block" : "none";
-            });
         }
 
         addNameElement();

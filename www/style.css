@@ -7,3 +7,128 @@
 .add-name-button {
     scroll-margin: 2em;
 }
+
+.nowrap {
+    white-space:nowrap;
+}
+
+/* compiled from https://codepen.io/PhiloBeddoe/pen/oNjzeGr */
+[data-tooltip] {
+cursor: pointer;
+display: inline-block;
+line-height: 1;
+position: relative;
+}
+[data-tooltip]::after {
+background-color: rgba(51, 51, 51, 0.9);
+border-radius: 0.3rem;
+color: #fff;
+content: attr(data-tooltip);
+font-size: 1rem;
+font-size: 85%;
+font-weight: normal;
+line-height: 1.15rem;
+opacity: 0;
+padding: 0.25rem 0.5rem;
+position: absolute;
+text-align: center;
+text-transform: none;
+transition: opacity 0.2s;
+visibility: hidden;
+/*white-space: nowrap;*/
+z-index: 1;
+width: 20rem; /* note: this was set to fixed to prevent the tooltip from flowing outside the screen */
+white-space: normal;
+
+}
+[data-tooltip].tooltip-top::before {
+border-style: solid;
+border-width: 0.3rem;
+content: "";
+opacity: 0;
+position: absolute;
+transition: opacity 0.2s;
+visibility: hidden;
+border-color: rgba(51, 51, 51, 0.9) transparent transparent transparent;
+top: 0;
+left: 50%;
+margin-left: -0.3rem;
+}
+[data-tooltip].tooltip-top::after {
+bottom: 100%;
+left: 50%;
+transform: translate(-50%);
+}
+[data-tooltip].tooltip-bottom::before {
+border-style: solid;
+border-width: 0.3rem;
+content: "";
+opacity: 0;
+position: absolute;
+transition: opacity 0.2s;
+visibility: hidden;
+border-color: transparent transparent rgba(51, 51, 51, 0.9) transparent;
+bottom: 0;
+left: 50%;
+margin-left: -0.3rem;
+}
+[data-tooltip].tooltip-bottom::after {
+top: 100%;
+left: 50%;
+transform: translate(-50%);
+}
+[data-tooltip].tooltip-left::before {
+border-style: solid;
+border-width: 0.3rem;
+content: "";
+opacity: 0;
+position: absolute;
+transition: opacity 0.2s;
+visibility: hidden;
+border-color: transparent transparent transparent rgba(51, 51, 51, 0.9);
+top: 0.3rem;
+right: calc(110% - 0.3rem);
+margin-top: -0.3rem;
+}
+[data-tooltip].tooltip-left::after {
+top: -0.3rem;
+right: calc(110% + 0.3rem);
+}
+[data-tooltip].tooltip-right::before {
+border-style: solid;
+border-width: 0.3rem;
+content: "";
+opacity: 0;
+position: absolute;
+transition: opacity 0.2s;
+visibility: hidden;
+border-color: transparent rgba(51, 51, 51, 0.9) transparent transparent;
+top: 50%;
+top: 0.3rem;
+left: calc(110% - 0.3rem);
+margin-top: -0.3rem;
+}
+[data-tooltip].tooltip-right::after {
+top: -0.3rem;
+left: calc(110% + 0.3rem);
+}
+@media (max-width: 767px) {
+[data-tooltip].tooltip-mobile::before {
+    display: none;
+}
+[data-tooltip].tooltip-mobile:after {
+    font-size: 1rem;
+    max-width: 20rem;
+    position: fixed;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    text-align: left;
+    transform: translate(-50%);
+    white-space: normal;
+}
+}
+[data-tooltip]:hover::after, [data-tooltip][class*=tooltip-]:hover::before {
+visibility: visible;
+opacity: 1;
+}
