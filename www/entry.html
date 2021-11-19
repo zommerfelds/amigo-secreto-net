@@ -47,31 +47,48 @@
                     <strong><span id="viewerName2"></span></strong>: O seu link já foi aberto e não pode mais ser
                     revelado.
                 </div>
-
+            </div>
+            <div id="error" style="display: none;" class="notification is-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Ocoreu um erro.
             </div>
         </div>
     </section>
 
     <script>
+        function showError(e) {
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error").innerHTML += "<br>" + e;
+            document.getElementById("loading").style.display = "none";
+        }
+
         var params = new URLSearchParams(location.search);
         var entryId = params.get("i");
 
-        fetch(`api/entries/${entryId}`, {
-            method: "GET",
-            headers: {
-                'Accept': 'application/json',
-            },
-        }).then(response => response.json()).then(json => {
-            document.getElementById("loading").style.display = "none";
-            document.getElementById("viewerName").innerText = json.viewer;
-            document.getElementById("viewerName2").innerText = json.viewer;
-            if (json.seen) {
-                document.getElementById("already-revealed").style.display = "block";
-            } else {
-                document.getElementById("entry").style.display = "block";
-            }
+        if (!entryId) {
+            showError("Link inválido.");
+        } else {
 
-        });
+            fetch(`api/entries/${entryId}`, {
+                method: "GET",
+                headers: {
+                    'Accept': 'application/json',
+                },
+            }).then(response => {
+                if (!response.ok) return Promise.reject(response.status);
+                return response.json().then(json => {
+                    document.getElementById("viewerName").innerText = json.viewer;
+                    document.getElementById("viewerName2").innerText = json.viewer;
+                    if (json.seen) {
+                        document.getElementById("already-revealed").style.display = "block";
+                    } else {
+                        document.getElementById("entry").style.display = "block";
+                    }
+                });
+            }).catch(showError).finally(() => {
+                document.getElementById("loading").style.display = "none";
+            });
+        }
 
         var revealed = false;
         function revealDraw() {

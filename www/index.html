@@ -65,6 +65,10 @@
                     <button class="button is-primary" id="submit" onclick="submit();">Sortear</button>
                 </div>
             </div>
+            <div id="error" style="display: none;" class="notification is-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Ocoreu um erro.
+            </div>
             <div class="notification is-info is-light" style="display: none;" id="result">
             </div>
         </div>
@@ -97,10 +101,17 @@
             document.getElementById("addName").scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
 
+        var submitButton = document.getElementById("submit");
+        var resultElem = document.getElementById("result");
+
+        function showError(e) {
+            document.getElementById("error").style.display = "block";
+            document.getElementById("error").innerHTML += "<br>" + e;
+            submitButton.classList.remove("is-loading");
+        }
+
         function submit() {
-            var submitButton = document.getElementById("submit");
             submitButton.classList.add("is-loading");
-            var resultElem = document.getElementById("result");
             resultElem.style.display = "none";
 
             var names = [];
@@ -117,21 +128,25 @@
                 body: JSON.stringify({
                     names: names,
                 }),
-            }).then(response => response.json()).then(json => {
-                submitButton.classList.remove("is-loading");
-                submitButton.innerText = "Sortear mais uma vez";
+            }).then(response => {
 
-                resultElem.style.display = "block";
-                resultElem.innerHTML = "Aqui estão os links para cada participante:<br><br>";
-                for (var i = 0; i < json.entries.length; i++) {
-                    var link = document.baseURI + json.entries[i].path;
-                    var linkWithoutHttp = link.replace(/(^\w+:|^)\/\//, '');
-                    resultElem.innerHTML +=
-                        `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
-                }
-                resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
-                resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            });
+                if (!response.ok) return Promise.reject(response.status);
+                return response.json().then(json => {
+                    submitButton.classList.remove("is-loading");
+                    submitButton.innerText = "Sortear mais uma vez";
+
+                    resultElem.style.display = "block";
+                    resultElem.innerHTML = "Aqui estão os links para cada participante:<br><br>";
+                    for (var i = 0; i < json.entries.length; i++) {
+                        var link = document.baseURI + json.entries[i].path;
+                        var linkWithoutHttp = link.replace(/(^\w+:|^)\/\//, '');
+                        resultElem.innerHTML +=
+                            `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
+                    }
+                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
+                    resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                });
+            }).catch(showError);
         }
 
         addNameElement();
