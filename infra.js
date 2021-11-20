@@ -44,7 +44,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             localPath: "www",
         },
         {
-            path: "/e",
+            path: "/e/{entryId}",
             localPath: "www/entry.html",
         },
 
@@ -147,7 +147,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     for (var i = 0; i < users.length; i++) {
                         outputEntries.push({
                             name: users[i].name,
-                            path: "e?i=" + entryIds[i],
+                            path: "e/" + entryIds[i],
                         });
                     }
 
