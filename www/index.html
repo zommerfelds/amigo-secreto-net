@@ -165,6 +165,7 @@
 
         function submit() {
             submitButton.classList.add("is-loading");
+            document.getElementById("error").style.display = "none";
             resultElem.style.display = "none";
 
             var names = [];
@@ -188,8 +189,16 @@
                     groups: groups
                 }),
             }).then(response => {
-                if (!response.ok) return Promise.reject(response.status);
                 return response.json().then(json => {
+
+                    if (response.status == 400 && json.reason == "INVALID_INPUT") {
+                        showError("Parametros inválidos: por favor checar os seus dados.");
+                        return;
+                    }
+                    if (!response.ok) {
+                        return Promise.reject(response.status);
+                    }
+
                     submitButton.classList.remove("is-loading");
                     submitButton.innerText = "Sortear mais uma vez";
 
