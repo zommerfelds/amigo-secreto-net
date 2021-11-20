@@ -56,7 +56,15 @@
                             <span class="select">
                                 <select>
                                     <option></option>
-                                    <option>TODO</option>
+                                    <option>Grupo 1</option>
+                                    <option>Grupo 2</option>
+                                    <option>Grupo 3</option>
+                                    <option>Grupo 4</option>
+                                    <option>Grupo 5</option>
+                                    <option>Grupo 6</option>
+                                    <option>Grupo 7</option>
+                                    <option>Grupo 8</option>
+                                    <option>Grupo 9</option>
                                 </select>
                             </span>
                         </div>
@@ -77,28 +85,28 @@
             </div>
             <article class="message is-light">
                 <div class="message-header is-clickable" onclick="advancedSettings();">
-                    <p>Configurações avançadas TODO</p>
-                    <span class="icon">
+                    <p>Configurações avançadas</p>
+                    <button class="icon">
                         <i id="advanced-settings-icon" class="fas fa-angle-down" aria-hidden="true"></i>
-                    </span>
+                    </button>
                 </div>
                 <div id="advanced-settings" class="message-body" style="display: none;">
                     <div class="field">
-                        <input id="groupMode" type="checkbox" class="switch is-rounded" onclick="toggleGroupMode();">
+                        <input id="groupMode" type="checkbox" class="switch is-rounded" onclick="refreshGroupMode();">
                         <label for="groupMode"></label>
                         Ativar grupos que não sorteiam entre <span style="white-space:nowrap;">si
                             <span class="tooltip-right tooltip-mobile"
                                 data-tooltip="Nomes no mesmo grupo nunca serão amigos secretos."><i
                                     class="fas fa-info-circle"></i></span></span>
                     </div>
-                    <div class="field block">
-                        <input id="destructiveMode" type="checkbox" class="switch is-rounded" checked>
+                    <!--div class="field block">
+                        <input id="destructiveMode" type="checkbox" class="switch is-rounded" checked disabled>
                         <label for="destructiveMode"></label>
-                        Links só podem ser abertos uma <span class="nowrap">vez
+                        Links só podem ser usados uma <span class="nowrap">vez
                             <span class="tooltip-right tooltip-mobile"
-                                data-tooltip="Com essa opção, você poderá compartilhar todos os links em um grupo. O systema vai garantir que duas pessoas nunca podem abrir o mesmo link."><i
+                                data-tooltip="Com essa opção ativada, você poderá compartilhar todos os links em um grupo abertamente. O systema vai garantir que duas pessoas nunca possam visualizar o mesmo nome."><i
                                     class="fas fa-info-circle"></i></span></span>
-                    </div>
+                    </div-->
                 </div>
             </article>
 
@@ -127,13 +135,16 @@
 
     <script>
         var nameInputs = [];
+        var groupSelects = [];
 
         var numNames = 0;
         function addNameElement() {
             var nameInput = document.getElementById("nameInputTemplate").content.cloneNode(true);
             nameInput.querySelector("label").innerText = "Nome " + (numNames + 1);
             nameInputs.push(nameInput.querySelector("input"));
+            groupSelects.push(nameInput.querySelector("select"));
             document.getElementById("form").appendChild(nameInput);
+            refreshGroupMode();
 
             numNames++;
         }
@@ -157,8 +168,13 @@
             resultElem.style.display = "none";
 
             var names = [];
+            var groups = [];
             for (var i = 0; i < nameInputs.length; i++) {
                 names.push(nameInputs[i].value.trim());
+                groups.push(groupSelects[i].value);
+            }
+            if (!document.getElementById("groupMode").checked) {
+                groups = undefined;
             }
 
             fetch("api/draws", {
@@ -169,9 +185,9 @@
                 },
                 body: JSON.stringify({
                     names: names,
+                    groups: groups
                 }),
             }).then(response => {
-
                 if (!response.ok) return Promise.reject(response.status);
                 return response.json().then(json => {
                     submitButton.classList.remove("is-loading");
@@ -185,7 +201,7 @@
                         resultElem.innerHTML +=
                             `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
                     }
-                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
+                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser usado uma única vez.';
                     resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 });
             }).catch(showError);
@@ -200,7 +216,7 @@
             icon.classList.add(shouldBeEnabled ? "fa-angle-up" : "fa-angle-down");
         }
 
-        function toggleGroupMode() {
+        function refreshGroupMode() {
             var allNameElems = document.querySelectorAll(".group-control");
             var groupModeEnabled = document.getElementById("groupMode").checked;
             allNameElems.forEach(e => {

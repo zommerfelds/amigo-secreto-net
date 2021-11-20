@@ -14,6 +14,26 @@ const drawsTable = new aws.dynamodb.Table(prefix + "draws", {
     billingMode: "PAY_PER_REQUEST"
 });
 
+function makeSuccessfulResponse(json) {
+    return {
+        statusCode: 200,
+        body: JSON.stringify(json),
+        headers: { "content-type": "application/json" },
+    };
+}
+function makeErrorResponse(reason, status) {
+    reason = reason || "ERROR";
+    status = status || 400;
+
+    return {
+        statusCode: status,
+        body: JSON.stringify({
+            reason: reason,
+        }),
+        headers: { "content-type": "application/json" },
+    };
+}
+
 // Create a public HTTP endpoint (using AWS APIGateway)
 const endpoint = new awsx.apigateway.API(prefix + "api", {
     staticRoutesBucket: new aws.s3.Bucket(prefix + "www"),
@@ -45,21 +65,35 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
-                    const numRows = Math.min(100, eventBody.names.length) | 0;
+                    if (!eventBody.names || eventBody.names.length > 100 || new Set(eventBody.names).size != eventBody.names.length) {
+                        return makeErrorResponse("INVALID_INPUT");
+                    }
+                    const groups = eventBody.groups || [...Array(eventBody.names.length).keys()];
+                    if (groups.length != eventBody.names.length) {
+                        return makeErrorResponse("INVALID_INPUT");
+                    }
 
                     const drawId = nanoid.nanoid();
                     const entryIds = [];
-                    const names = [];
-                    for (var i = 0; i < numRows; i++) {
+                    const users = [];
+                    for (var i = 0; i < eventBody.names.length; i++) {
                         entryIds.push(nanoid.nanoid());
-                        names.push(sanitizeHtml(eventBody.names[i]));
+                        users.push({
+                            name: sanitizeHtml(eventBody.names[i]),
+                            group: groups[i],
+                        });
                     }
 
                     let drawnIndices = [];
 
-                    while (true) {
+                    for (let attempts = 0;; attempts++) {
+                        if (attempts > 100) {
+                            // This may happen if the user input an impossible to solve draw.
+                            return makeErrorResponse("TOO_MANY_ATTEMPTS");
+                        }
+
                         drawnIndices = [];
-                        const remaining = [...Array(numRows).keys()];
+                        const remaining = [...Array(users.length).keys()];
                         let chainStart = null;
                         let current = null;
                         while (remaining.length > 0) {
@@ -67,7 +101,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                                 chainStart = remaining[Math.floor(Math.random() * remaining.length)];
                                 current = chainStart;
                             } else {
-                                const candidates = remaining.filter(r => r != current);
+                                const candidates = remaining.filter(r => users[r].group != users[current].group);
                                 if (candidates.length == 0) break;
                                 const draw = candidates[Math.floor(Math.random() * candidates.length)];
                                 drawnIndices[current] = draw;
@@ -81,16 +115,22 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         if (remaining.length == 0) break;
                     }
 
+                    if (new Set(drawnIndices).size != users.length) {
+                        // Assert that draw is valid.
+                        // Note: this should rather be done in a unit test.
+                        throw new Error("post-condition check failed");
+                    }
+
                     const putRequests = [];
-                    for (let i = 0; i < numRows; i++) {
+                    for (let i = 0; i < users.length; i++) {
                         putRequests.push({
                             PutRequest: {
                                 Item: {
                                     'DrawId': drawId,
                                     'EntryId': entryIds[i],
                                     'Version': 1,
-                                    'DrawnName': names[drawnIndices[i]],
-                                    'IntendedViewer': names[i],
+                                    'DrawnName': users[drawnIndices[i]].name,
+                                    'IntendedViewer': users[i].name,
                                     'Created': Date.now()
                                 }
                             }
@@ -104,20 +144,16 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     await db.batchWrite(batchWriteParams).promise();
 
                     var outputEntries = [];
-                    for (var i = 0; i < numRows; i++) {
+                    for (var i = 0; i < users.length; i++) {
                         outputEntries.push({
-                            name: names[i],
+                            name: users[i].name,
                             path: "e?i=" + entryIds[i],
                         });
                     }
 
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify({
-                            entries: outputEntries
-                        }),
-                        headers: { "content-type": "application/json" },
-                    };
+                    return makeSuccessfulResponse({
+                        entries: outputEntries
+                    });
                 }
             }),
         },
@@ -146,14 +182,10 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     console.log("Data: ", data);
                     const item = data.Items[0];
 
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify({
-                            viewer: item.IntendedViewer,
-                            seen: item.Seen,
-                        }),
-                        headers: { "content-type": "application/json" },
-                    };
+                    return makeSuccessfulResponse({
+                        viewer: item.IntendedViewer,
+                        seen: item.Seen,
+                    });
                 }
             }),
         },
@@ -186,26 +218,15 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                         console.log("Data: ", data);
                     } catch (e) {
                         if (e.code == "ConditionalCheckFailedException") {
-
-                            return {
-                                statusCode: 400,
-                                body: JSON.stringify({
-                                    reason: "ALREADY_DRAWN",
-                                }),
-                                headers: { "content-type": "application/json" },
-                            };
+                            return makeErrorResponse("ALREADY_DRAWN");
                         } else {
                             throw e;
                         }
                     }
 
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify({
-                            drawnName: data.Attributes.DrawnName,
-                        }),
-                        headers: { "content-type": "application/json" },
-                    };
+                    return makeSuccessfulResponse({
+                        drawnName: data.Attributes.DrawnName,
+                    });
                 }
             }),
         },
