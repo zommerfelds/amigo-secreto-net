@@ -12,6 +12,10 @@
     white-space:nowrap;
 }
 
+.card-result {
+    background-color:#eff5fb;
+}
+
 /* compiled from https://codepen.io/PhiloBeddoe/pen/oNjzeGr */
 [data-tooltip] {
 cursor: pointer;

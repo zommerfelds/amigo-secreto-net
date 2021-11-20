@@ -18,6 +18,7 @@
 
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="bulma-switch.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.1/dist/bulma-toast.min.js"></script>
 </head>
 
 <body>
@@ -42,7 +43,7 @@
 
             <div class="notification is-warning is-light">
                 <i class="fas fa-exclamation-triangle"></i>
-                Este site ainda está em fase de teste.
+                Este site ainda está em fase de construção.
             </div>
 
             <div id="form" class="block">
@@ -119,7 +120,22 @@
                 <i class="fas fa-exclamation-triangle"></i>
                 Ocoreu um erro.
             </div>
-            <div class="notification is-info is-light" style="display: none;" id="result">
+            <div id="result" class="card is-shadowlessa card-result" style="display: none;">
+                <header class="card-header is-shadowless">
+                    <p class="card-header-title">
+                        Resultado
+                    </p>
+                    <button class="card-header-icon" onclick="copyResult();">
+                        <span class="icon is-small">
+                            <i class="far fa-copy"></i>
+                        </span>
+                        <span style="margin-left: 0.5em;">Copiar</span>
+                    </button>
+                </header>
+                <div class="card-content">
+                    <div class="content" id="result-text">
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -156,6 +172,7 @@
 
         var submitButton = document.getElementById("submit");
         var resultElem = document.getElementById("result");
+        var resultTextElem = document.getElementById("result-text");
 
         function showError(e) {
             document.getElementById("error").style.display = "block";
@@ -203,15 +220,15 @@
                     submitButton.innerText = "Sortear mais uma vez";
 
                     resultElem.style.display = "block";
-                    resultElem.innerHTML = "Aqui estão os links para cada participante:<br><br>";
+                    resultTextElem.innerHTML = "Aqui estão os links individuais para o amigo secreto:<br><br>";
                     for (var i = 0; i < json.entries.length; i++) {
                         var link = document.baseURI + json.entries[i].path;
                         var linkWithoutHttp = link.replace(/(^\w+:|^)\/\//, '');
-                        resultElem.innerHTML +=
-                            `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
+                        resultTextElem.innerHTML +=
+                            `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br><br>`;
                     }
-                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser usado uma única vez.';
-                    resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    resultTextElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser usado uma única vez.';
+                    resultTextElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 });
             }).catch(showError);
         }
@@ -231,6 +248,15 @@
             allNameElems.forEach(e => {
                 e.style.display = groupModeEnabled ? "block" : "none";
             });
+        }
+
+        function copyResult() {
+            navigator.clipboard.writeText(resultTextElem.innerText);
+            bulmaToast.toast({
+                message: 'Texto copiado',
+                position: 'center',
+                type: 'is-warning',
+            })
         }
 
         addNameElement();
