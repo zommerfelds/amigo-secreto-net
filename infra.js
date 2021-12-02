@@ -65,7 +65,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
                     const eventBodyStr = buff.toString('UTF-8');
                     const eventBody = JSON.parse(eventBodyStr);
 
-                    if (!eventBody.names || eventBody.names.length > 100 || new Set(eventBody.names).size != eventBody.names.length) {
+                    if (!eventBody.names || eventBody.names.length < 2 || eventBody.names.length > 100 || new Set(eventBody.names).size != eventBody.names.length) {
                         return makeErrorResponse("INVALID_INPUT");
                     }
                     const groups = eventBody.groups || [...Array(eventBody.names.length).keys()];
@@ -86,7 +86,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
 
                     let drawnIndices = [];
 
-                    for (let attempts = 0;; attempts++) {
+                    for (let attempts = 0; ; attempts++) {
                         if (attempts > 100) {
                             // This may happen if the user input an impossible to solve draw.
                             return makeErrorResponse("TOO_MANY_ATTEMPTS");

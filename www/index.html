@@ -41,33 +41,36 @@
 
             <p class="block">Nenhum cadastro ou e-mail é necessario!</p>
 
-            <div class="notification is-warning is-light">
-                <i class="fas fa-exclamation-triangle"></i>
-                Este site ainda está em fase de construção.
-            </div>
-
             <div id="form" class="block">
                 <template id="nameInputTemplate">
-                    <label class="label"></label>
-                    <div class="field has-addons">
-                        <div class="control is-expanded">
-                            <input class="input" type="text" placeholder="Inserir nome" autocomplete="nope">
-                        </div>
-                        <div class="control group-control" style="display: none;">
-                            <span class="select">
-                                <select>
-                                    <option></option>
-                                    <option>Grupo 1</option>
-                                    <option>Grupo 2</option>
-                                    <option>Grupo 3</option>
-                                    <option>Grupo 4</option>
-                                    <option>Grupo 5</option>
-                                    <option>Grupo 6</option>
-                                    <option>Grupo 7</option>
-                                    <option>Grupo 8</option>
-                                    <option>Grupo 9</option>
-                                </select>
-                            </span>
+                    <div data-index="will be replaced by index" class="field app-form-name">
+                        <label class="label"></label>
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <input class="input app-form-name-input" type="text" placeholder="Inserir nome" autocomplete="nope">
+                            </div>
+                            <div class="control group-control" style="display: none;">
+                                <span class="select">
+                                    <select class="app-form-group-select">
+                                        <option></option>
+                                        <option>Grupo 1</option>
+                                        <option>Grupo 2</option>
+                                        <option>Grupo 3</option>
+                                        <option>Grupo 4</option>
+                                        <option>Grupo 5</option>
+                                        <option>Grupo 6</option>
+                                        <option>Grupo 7</option>
+                                        <option>Grupo 8</option>
+                                        <option>Grupo 9</option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="control">
+                                <a class="button is-link is-light"
+                                    onclick="removeName(this.parentElement.parentElement.parentElement.getAttribute('data-index'));">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </template>
@@ -119,6 +122,7 @@
             <div id="error" style="display: none;" class="notification is-danger">
                 <i class="fas fa-exclamation-triangle"></i>
                 Ocoreu um erro.
+                <p id="error-text"></p>
             </div>
             <div id="result" class="card is-shadowlessa card-result" style="display: none;">
                 <header class="card-header is-shadowless">
@@ -147,30 +151,42 @@
                         class="fab fa-github"></i></a>.<br>
                 Clique <a
                     href="https://docs.google.com/forms/d/e/1FAIpQLSclbtS3MPzrldFtnwRenYHRzLyirquXyFqhK_P43UKawCyxuQ/viewform?usp=sf_link">aqui
-                    <i class="far fa-external-link fa-sm"></i></a> para enviar o seu feedback ou mensagem.<br>
+                    <i class="far fa-external-link fa-sm"></i></a> para enviar o seu feedback ou uma mensagem.<br>
             </p>
         </div>
     </footer>
 
     <script>
-        var nameInputs = [];
-        var groupSelects = [];
-
-        var numNames = 0;
         function addNameElement() {
             var nameInput = document.getElementById("nameInputTemplate").content.cloneNode(true);
-            nameInput.querySelector("label").innerText = "Nome " + (numNames + 1);
-            nameInputs.push(nameInput.querySelector("input"));
-            groupSelects.push(nameInput.querySelector("select"));
             document.getElementById("form").appendChild(nameInput);
             refreshGroupMode();
-
-            numNames++;
+            refreshNameElements();
         }
 
         function addNameAndScroll() {
             addNameElement();
             document.getElementById("addName").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function removeName(index) {
+            document.querySelector("div[data-index='" +index+ "']").remove();
+            nameInputs.splice(index, 1);
+            groupSelects.splice(index, 1);
+
+            refreshNameElements();
+        }
+
+        function refreshNameElements() {
+            nameInputs = [];
+            groupSelects = [];
+            document.querySelectorAll(".app-form-name").forEach((elem, i) => {
+                elem.setAttribute("data-index", i);
+                elem.querySelector("label").innerText = "Nome " + (i + 1);
+                nameInputs.push(elem.querySelector("input"));
+                groupSelects.push(elem.querySelector("select"));
+            });
+            
         }
 
         var submitButton = document.getElementById("submit");
@@ -179,7 +195,7 @@
 
         function showError(e) {
             document.getElementById("error").style.display = "block";
-            document.getElementById("error").innerHTML += "<br>" + e;
+            document.getElementById("error-text").textContent = e;
             submitButton.classList.remove("is-loading");
         }
 
@@ -190,10 +206,12 @@
 
             var names = [];
             var groups = [];
-            for (var i = 0; i < nameInputs.length; i++) {
-                names.push(nameInputs[i].value.trim());
-                groups.push(groupSelects[i].value);
-            }
+            document.querySelectorAll(".app-form-name-input").forEach((elem) => {
+                names.push(elem.value.trim());
+            });
+            document.querySelectorAll(".app-form-group-select").forEach((elem) => {
+                groups.push(elem.value);
+            });
             if (!document.getElementById("groupMode").checked) {
                 groups = undefined;
             }
@@ -258,7 +276,7 @@
             bulmaToast.toast({
                 message: 'Texto copiado',
                 position: 'center',
-                type: 'is-warning',
+                type: 'is-dark',
             })
         }
 

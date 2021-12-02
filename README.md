@@ -1,7 +1,7 @@
 # amigo-secreto-net
 Secret santa naming drawing service in Portuguese.
 
-NOTE: work in progress!
+NOTE: this is a work in progress!
 
 [amigo-secreto.net](https://amigo-secreto.net)
 
@@ -39,4 +39,4 @@ For only previewing HTML files, without the backend:
 ```
 yarn run ui
 ```
-Note that auto-reload dosn't work on the root path (need to add `index.html`).
+Note that auto-reload dosn't work on the root path (need to add `/index.html`). Click on the printed link.
