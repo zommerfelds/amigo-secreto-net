@@ -19,6 +19,15 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="bulma-switch.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bulma-toast@2.4.1/dist/bulma-toast.min.js"></script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-036GDGL6R6"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-036GDGL6R6');
+    </script>
 </head>
 
 <body>
@@ -47,7 +56,8 @@
                         <label class="label"></label>
                         <div class="field has-addons">
                             <div class="control is-expanded">
-                                <input class="input app-form-name-input" type="text" placeholder="Inserir nome" autocomplete="nope">
+                                <input class="input app-form-name-input" type="text" placeholder="Inserir nome"
+                                    autocomplete="nope">
                             </div>
                             <div class="control group-control" style="display: none;">
                                 <span class="select">
@@ -170,7 +180,7 @@
         }
 
         function removeName(index) {
-            document.querySelector("div[data-index='" +index+ "']").remove();
+            document.querySelector("div[data-index='" + index + "']").remove();
             nameInputs.splice(index, 1);
             groupSelects.splice(index, 1);
 
@@ -186,7 +196,7 @@
                 nameInputs.push(elem.querySelector("input"));
                 groupSelects.push(elem.querySelector("select"));
             });
-            
+
         }
 
         var submitButton = document.getElementById("submit");
