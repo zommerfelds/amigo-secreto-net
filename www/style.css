@@ -14,6 +14,19 @@
 
 .card-result {
     background-color:#eff5fb;
+    word-break: break-all;
+}
+
+.steps {
+    font-size: 2.5rem;
+    padding-bottom: 6rem;
+}
+.step-icon {
+    font-size: 2.5rem;
+    padding-left: 1rem;
+}
+.steps-number {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 /* compiled from https://codepen.io/PhiloBeddoe/pen/oNjzeGr */
