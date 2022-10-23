@@ -162,7 +162,7 @@
                         resultElem.innerHTML +=
                             `${json.entries[i].name}:<br><a target="_blank" href="${link}">${linkWithoutHttp}</a><br>`;
                     }
-                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i> Atenção: Cada link só pode ser aberto uma única vez.';
+                    resultElem.innerHTML += '<br><i class="fas fa-exclamation-triangle"></i>Atenção: Cada link só pode ser aberto uma única vez.';
                     resultElem.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 });
             }).catch(showError);
