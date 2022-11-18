@@ -2,11 +2,11 @@
     "name": "amigo-secreto-net",
     "main": "infra.js",
     "dependencies": {
-        "@pulumi/aws": "^4.0.0",
-        "@pulumi/awsx": "^0.30.0",
-        "@pulumi/pulumi": "^3.0.0",
-        "nanoid": "^3.1.30",
-        "sanitize-html": "^2.5.3"
+        "@pulumi/aws": "^5.21.0",
+        "@pulumi/awsx": "^0.40.1",
+        "@pulumi/pulumi": "^3.47.0",
+        "nanoid": "^4.0.0",
+        "sanitize-html": "^2.7.3"
     },
     "scripts": {
         "ui": "echo $(gp url 8080)/index.html && echo $(gp url 8080)/entry.html && live-server www --no-browser",
@@ -14,6 +14,6 @@
         "deploy-prod": "pulumi up --stack prod"
     },
     "devDependencies": {
-        "live-server": "^1.2.1"
+        "live-server": "^1.2.2"
     }
 }

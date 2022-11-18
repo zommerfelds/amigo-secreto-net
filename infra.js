@@ -55,7 +55,7 @@ const endpoint = new awsx.apigateway.API(prefix + "api", {
             eventHandler: new aws.lambda.CallbackFunction(prefix + "draws-post", {
                 callback: async event => {
                     const AWS = require('aws-sdk');
-                    const nanoid = require('nanoid');
+                    const nanoid = await import('nanoid');
                     const sanitizeHtml = require('sanitize-html');
 
                     AWS.config.update({ region: region.get().id });
