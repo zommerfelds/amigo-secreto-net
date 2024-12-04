@@ -5,6 +5,12 @@ NOTE: this is a work in progress!
 
 [amigo-secreto.net](https://amigo-secreto.net)
 
+## TODO
+
+[] Bug: when name is empty it should be ignored
+[] List possible next features here and rank them
+[] Put ads?
+
 ## Development
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/zommerfelds/amigo-secreto-net)
