@@ -7,9 +7,9 @@ NOTE: this is a work in progress!
 
 ## TODO
 
-[] Bug: when name is empty it should be ignored
-[] List possible next features here and rank them
-[] Put ads?
+- [ ] Bug: when name is empty it should be ignored
+- [ ] List possible next features here and rank them
+- [ ] Put ads?
 
 ## Development
 
