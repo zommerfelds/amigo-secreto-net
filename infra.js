@@ -241,10 +241,31 @@ if (domainName != null) {
 
     const cert = new aws.acm.Certificate(prefix + "cert", {
         domainName: domainName,
-        validationMethod: "EMAIL",
+        validationMethod: "DNS",
     });
-    // Note: need to check emails during "pulumi up"
-    new aws.acm.CertificateValidation(prefix + "cert-validation", { certificateArn: cert.arn });
+
+    // https://www.pulumi.com/docs/iac/clouds/aws/guides/api-gateway/#custom-domain
+    const validationOption = cert.domainValidationOptions[0];
+    const validationRecord = new aws.route53.Record("certificate-validation-record", {
+        name: validationOption.resourceRecordName,
+        type: validationOption.resourceRecordType,
+        records: [validationOption.resourceRecordValue],
+        zoneId: route53ZoneId,
+        ttl: 60,
+    });
+
+    // It seems like the certificate validation must be created in us-east-1
+    const usEast1 = new aws.Provider("us-east-1", {
+        region: "us-east-1",
+    });
+    new aws.acm.CertificateValidation(
+        "certificate-validation",
+        {
+            certificateArn: cert.arn,
+            validationRecordFqdns: [validationRecord.fqdn],
+        },
+        { provider: usEast1 },
+    );
 
     const apiGatewayDomainName = new aws.apigateway.DomainName(prefix + "domain", {
         certificateArn: cert.arn,
